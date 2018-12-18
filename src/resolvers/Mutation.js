@@ -9,9 +9,9 @@ const Mutations = {
     },
     async updateItem(parent, args, ctx, info) {
         // first take a copy of the updates;
-        const updtaes = { ...args };
+        const updates = { ...args };
         // remove the ID from updates
-        delete this.updates.id;
+        delete updates.id;
         // run the update
         return ctx.db.mutation.updateItem({
             data: updates,
