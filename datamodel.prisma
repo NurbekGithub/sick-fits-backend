@@ -14,7 +14,7 @@ type User {
   password: String!,
   resetToken: String,
   resetTokenExpiry: String,
-  permission: [Permission]
+  permissions: [Permission]
 }
 
 type Item {

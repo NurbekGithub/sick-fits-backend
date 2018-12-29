@@ -6,7 +6,7 @@ const createServer = require('./createServer');
 const server = createServer();
 
 server.express.use(cookieParser());
-// TODO Use express middlware to populate current user
+// Deocde the JTW so we can get the user ID on each request;
 server.express.use((req, res, next) => {
     const { token } = req.cookies;
     if(token) {
