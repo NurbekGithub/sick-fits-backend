@@ -20,10 +20,12 @@ type Mutation {
     signout: SuccessMessage
     requestReset(email: String!): SuccessMessage
     resetPassword(password: String!, passwordConfirm: String!, resetToken: String!): User
+    updatePermissions(permissions: [Permission]!, id: ID!): User
 }
 type Query {
     items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, first: Int): [Item]!
     item(where: ItemWhereUniqueInput!): Item
     itemsConnection(where: ItemWhereInput): ItemConnection!
-    me: User
+    me: User,
+    users(where: UserWhereInput): [User]!
 }

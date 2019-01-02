@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
+const { hasPermission } = require('../utils');
+const { transport, makeEmail } = require('../mail');
 
 function setCookie(token, res) {
     res.cookie('token', token, {
@@ -13,9 +15,19 @@ function setCookie(token, res) {
 const Mutations = {
     async createItem(parent, args, ctx, info) {
         // TODO: Check if they are logged in
-
+        if(!ctx.request.userId) {
+            throw new Error('You must be logged in to do that');
+        }
         const item = await ctx.db.mutation.createItem({
-            data: { ...args }
+            data: { 
+                // This is how we create a relationship between entities;
+                user: {
+                    connect: {
+                        id: ctx.request.userId
+                    }
+                },
+                ...args
+            }
         }, info);
         return item;
     },
@@ -24,7 +36,7 @@ const Mutations = {
         // 1: find the item
         const item = await ctx.db.query.item({where}, `{ id, title }`);
         // 2: Check if they have permission to delete
-        // TODO
+        hasPermission(ctx.request.user, ['ITEMDELETE']);
         // 3: Delete it
 
         return ctx.db.mutation.deleteItem({ where }, info);
@@ -95,8 +107,18 @@ const Mutations = {
             where: { email: args.email }, 
             data: { resetToken, resetTokenExpiry } 
         });
-        return { message: 'Thanks!' };
         // 3. Email them that reset token
+        transport.sendMail({
+            from: 'nurbekizbassar@gmail.com',
+            to: user.email,
+            subject: 'Your reset password confirmation token',
+            html: makeEmail(`
+                To reset your password, please click a following link
+                <a href="${process.env.FRONTEND_URL}/reset?token=${resetToken}">Over here!✋</a>
+            `)
+        })
+        // 4. Return a message;
+        return { message: 'Thanks!' };
     },
     async resetPassword(parent, args, ctx, info) {
         // 1. Check if the passwords match
@@ -131,6 +153,20 @@ const Mutations = {
         setCookie(token, ctx.response);
         // 8. return new User
         return updatedUser
+    },
+    async updatePermissions(parent, args, ctx, info) {
+        // 1. Check if they are logged in
+        if(!ctx.request.user) {
+            throw new Error('You must be logged in');
+        }
+        // 2. Check if they have permission to update permissions
+        hasPermission(ctx.request.user, ['ADMIN', 'PERMISSIONUPDATE']);
+        // 3. Update
+        const updatedUser = await ctx.db.mutation.updateUser({ 
+            data: { permissions: { set: args.permissions } },
+            where: {id: args.id}
+        }, info)
+        return updatedUser;
     }
 };
 
