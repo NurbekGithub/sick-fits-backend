@@ -9,6 +9,7 @@ type User {
     name: String!
     email: String!
     permissions: [Permission!]!
+    cart: [CartItem!]!
 }
 
 type Mutation {
@@ -21,6 +22,8 @@ type Mutation {
     requestReset(email: String!): SuccessMessage
     resetPassword(password: String!, passwordConfirm: String!, resetToken: String!): User
     updatePermissions(permissions: [Permission]!, id: ID!): User
+    addToCart(id: ID!): CartItem
+    removeFromCart(id: ID!): CartItem
 }
 type Query {
     items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, first: Int): [Item]!

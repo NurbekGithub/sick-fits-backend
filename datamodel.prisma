@@ -14,7 +14,8 @@ type User {
   password: String!,
   resetToken: String,
   resetTokenExpiry: String,
-  permissions: [Permission]
+  permissions: [Permission],
+  cart: [CartItem!]!
 }
 
 type Item {
@@ -25,4 +26,11 @@ type Item {
   largeImage: String,
   price: Int!,
   user: User!
+}
+
+type CartItem {
+  id: ID! @unique,
+  quantity: Int!
+  item: Item #relelationship to Item
+  user: User! #relelationship to User
 }
