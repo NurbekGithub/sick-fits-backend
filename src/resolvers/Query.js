@@ -21,6 +21,22 @@ const Query = {
 
         // 3. if they do, query all the users
         return ctx.db.query.users({}, info);
+    },
+    async order(parent, args, ctx, info) {
+        // 1. Check if they are logged in
+        if (!ctx.request.userId) {
+            throw new Error('You must be logged in!');
+        }
+        // 2. Query the order
+        const order = await ctx.db.query.order({where: {id: args.id}}, info);
+        // 3. Check if they own the order and has permission to see it
+        const ownsOrder = order.user.id === ctx.request.userId;
+        const hasPermission = ctx.request.user.permissions.includes('ADMIN');
+        if (!ownsOrder && !hasPermission) {
+            throw new Error('You cannot see this page');
+        }
+        // 4. Return the order
+        return order;
     }
 };
 
