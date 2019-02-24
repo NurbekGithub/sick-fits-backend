@@ -28,6 +28,7 @@ type Mutation {
 }
 type Query {
     items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, first: Int): [Item]!
+    orders(orderBy: OrderOrderByInput): [Order]!
     item(where: ItemWhereUniqueInput!): Item
     itemsConnection(where: ItemWhereInput): ItemConnection!
     me: User,
